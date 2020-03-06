@@ -1,4 +1,9 @@
 <?php
+/*use Tracy\Debugger;
+
+Debugger::enable();*/
+
+
 include_once './config/database.php';
 require "../vendor/autoload.php";
 use \Firebase\JWT\JWT;
@@ -42,7 +47,7 @@ if($num > 0){
         $audience_claim = "THE_AUDIENCE";
         $issuedat_claim = time(); // issued at
         $notbefore_claim = $issuedat_claim + 10; //not before in seconds
-        $expire_claim = $issuedat_claim + 60; // expire time in seconds
+        $expire_claim = $issuedat_claim + 2629743; // expire time in seconds, month
         $token = [
             "iss" => $issuer_claim,
             "aud" => $audience_claim,
