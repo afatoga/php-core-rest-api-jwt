@@ -11,6 +11,10 @@ class ComposerStaticInit0c75c1065f8d6ad367e03dddd576f07f
         array (
             'Firebase\\JWT\\' => 13,
         ),
+        'A' => 
+        array (
+            'App\\' => 4,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -18,6 +22,14 @@ class ComposerStaticInit0c75c1065f8d6ad367e03dddd576f07f
         array (
             0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
         ),
+        'App\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/app',
+        ),
+    );
+
+    public static $classMap = array (
+        'AltoRouter' => __DIR__ . '/..' . '/altorouter/altorouter/AltoRouter.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
@@ -25,6 +37,7 @@ class ComposerStaticInit0c75c1065f8d6ad367e03dddd576f07f
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit0c75c1065f8d6ad367e03dddd576f07f::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit0c75c1065f8d6ad367e03dddd576f07f::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit0c75c1065f8d6ad367e03dddd576f07f::$classMap;
 
         }, null, ClassLoader::class);
     }

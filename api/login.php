@@ -1,11 +1,6 @@
 <?php
-/*use Tracy\Debugger;
 
-Debugger::enable();*/
-
-
-include_once './config/database.php';
-require "../vendor/autoload.php";
+include_once './api/config/database.php';
 use \Firebase\JWT\JWT;
 
 header("Access-Control-Allow-Origin: *");
