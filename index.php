@@ -4,6 +4,7 @@ require "./vendor/autoload.php";
 
 use App\Controllers\HomeController;
 use App\Controllers\AuthController;
+use App\Controllers\OrderController;
 
 $router = new AltoRouter();
 
@@ -18,11 +19,35 @@ $router->map('GET', '/user/[i:id]/', function ($id) {
     require __DIR__ . '/views/user-details.php';
 });
 
-// map user details page
-$router->map('POST', '/v1/api/login', function () {
+// map login
+$router->map('POST', '/af-api/login', function () {
     $authController = new AuthController;
     $authController->login();
 });
+
+// map createNewOrder
+$router->map('POST', '/af-api/createNewOrder', function () {
+    $authController = new AuthController;
+    $hasPermission = $authController->hasUserPermission();
+
+    $orderController = new OrderController;
+    $homeController = new HomeController;
+
+    if ($hasPermission)
+    {
+        if ($orderController->createNewOrder()) 
+        {
+            $homeController->jsonResponse(201, 'New order was created.');
+        } else {
+            $homeController->jsonResponse(403, 'Mistake.');
+        }
+        
+    } else {
+        $homeController->jsonResponse(401, 'Not permitted.');
+    }
+
+});
+
 // match current request url
 $match = $router->match();
 
