@@ -25,6 +25,30 @@ $router->map('POST', '/af-api/login', function () {
     $authController->login();
 });
 
+// map getOrders with count
+$router->map('GET', '/af-api/getOrders/*', function () {
+    $authController = new AuthController;
+    $hasPermission = $authController->hasUserPermission();
+
+    $orderController = new OrderController;
+    $homeController = new HomeController;
+
+    if ($hasPermission)
+    {   
+        $count = (int) $_GET['count'];
+        $orderList = $orderController->getOrders($count);
+        if ($count > 0 && $orderList)
+        {
+            $homeController->jsonResponse(201, null, $orderList);
+        } else {
+            $homeController->jsonResponse(404, 'Not Found');
+        }
+    } else {
+        $homeController->jsonResponse(401, 'Not permitted.');
+    }
+
+});
+
 // map createNewOrder
 $router->map('POST', '/af-api/createNewOrder', function () {
     $authController = new AuthController;
@@ -35,13 +59,13 @@ $router->map('POST', '/af-api/createNewOrder', function () {
 
     if ($hasPermission)
     {
-        if ($orderController->createNewOrder()) 
+        if ($orderController->createNewOrder())
         {
             $homeController->jsonResponse(201, 'New order was created.');
         } else {
-            $homeController->jsonResponse(403, 'Mistake.');
+            $homeController->jsonResponse(401, 'Mistake.');
         }
-        
+
     } else {
         $homeController->jsonResponse(401, 'Not permitted.');
     }

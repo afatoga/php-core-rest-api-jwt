@@ -8,7 +8,7 @@ class HomeController
 		echo 'domovska stranka';
 	}
 
-	public function jsonResponse(int $code, string $msg): void
+	public function jsonResponse(int $code, string $msg = null, array $body = null): void
 	{
 		header("Access-Control-Allow-Origin: *");
         header("Content-Type: application/json; charset=UTF-8");
@@ -17,6 +17,13 @@ class HomeController
 		header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 		http_response_code($code);
-		echo json_encode(array("message" => $msg));
+
+		if (is_null($body))
+		{
+			echo json_encode(["message" => $msg]);
+		} else {
+			echo json_encode($body);
+		}
+
     }
 }
