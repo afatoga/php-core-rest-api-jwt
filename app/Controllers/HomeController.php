@@ -5,7 +5,7 @@ class HomeController
 {
 	public function home(): void
 	{
-		echo 'domovska stranka';
+		echo '<h1>domovska stranka</h1>';
 	}
 
 	public function jsonResponse(int $code, string $msg = null, array $body = null): void

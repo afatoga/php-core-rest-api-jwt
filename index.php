@@ -25,51 +25,92 @@ $router->map('POST', '/af-api/login', function () {
     $authController->login();
 });
 
-// map getOrders with count
-$router->map('GET', '/af-api/getOrders/*', function () {
+// map getOrders with count ..?count=0 (all)
+$router->map('GET', '/af-api/get-orders/*', function () {
     $authController = new AuthController;
-    $hasPermission = $authController->hasUserPermission();
-
-    $orderController = new OrderController;
     $homeController = new HomeController;
 
-    if ($hasPermission)
-    {   
-        $count = (int) $_GET['count'];
-        $orderList = $orderController->getOrders($count);
-        if ($count > 0 && $orderList)
-        {
-            $homeController->jsonResponse(201, null, $orderList);
+    if (!$authController->hasUserPermission()) return $homeController->jsonResponse(401, 'Not permitted.');
+
+    $orderController = new OrderController;
+
+    $count = filter_var($_GET['count'], FILTER_VALIDATE_INT);
+
+    if ($count >= 0) {
+        $orderList = $orderController->getOrders((int) $count);
+
+        if ($orderList) {
+            $homeController->jsonResponse(200, null, $orderList);
         } else {
-            $homeController->jsonResponse(404, 'Not Found');
+            $homeController->jsonResponse(404, 'Not Found.');
         }
     } else {
-        $homeController->jsonResponse(401, 'Not permitted.');
+        $homeController->jsonResponse(400, 'Bad request.');
     }
+});
 
+// map get order total price
+$router->map('GET', '/af-api/get-order-total-price/*', function () {
+    $authController = new AuthController;
+    $homeController = new HomeController;
+
+    if (!$authController->hasUserPermission()) return $homeController->jsonResponse(401, 'Not permitted.');
+    
+    $orderController = new OrderController;
+    $orderId = filter_var($_GET['orderId'], FILTER_VALIDATE_INT);
+
+    if ($orderId) $totalPrice = $orderController->getOrderTotalPrice($orderId);
+    if (is_null($totalPrice)) {
+        $homeController->jsonResponse(404, 'Order not found.');
+    } else {
+        $homeController->jsonResponse(200, null, ['totalPrice' => $totalPrice]);
+    }
 });
 
 // map createNewOrder
-$router->map('POST', '/af-api/createNewOrder', function () {
+$router->map('POST', '/af-api/create-new-order', function () {
     $authController = new AuthController;
-    $hasPermission = $authController->hasUserPermission();
-
-    $orderController = new OrderController;
     $homeController = new HomeController;
 
-    if ($hasPermission)
-    {
-        if ($orderController->createNewOrder())
-        {
-            $homeController->jsonResponse(201, 'New order was created.');
-        } else {
-            $homeController->jsonResponse(401, 'Mistake.');
-        }
+    if (!$authController->hasUserPermission()) return $homeController->jsonResponse(401, 'Not permitted.');
 
+    $orderController = new OrderController;
+
+    if ($orderController->createNewOrder()) {
+        $homeController->jsonResponse(201, 'New order was created.');
     } else {
-        $homeController->jsonResponse(401, 'Not permitted.');
+        $homeController->jsonResponse(401, 'Mistake.');
     }
+});
 
+$router->map('POST', '/af-api/insert-new-order-item', function () {
+    $authController = new AuthController;
+    $homeController = new HomeController;
+
+    if (!$authController->hasUserPermission()) return $homeController->jsonResponse(401, 'Not permitted.');
+
+    $orderController = new OrderController;
+
+    if ($orderController->insertNewOrderItem()) {
+        $homeController->jsonResponse(201, 'New item was created.');
+    } else {
+        $homeController->jsonResponse(401, 'Mistake.');
+    }
+});
+
+$router->map('POST', '/af-api/update-order-item', function () {
+    $authController = new AuthController;
+    $homeController = new HomeController;
+
+    if (!$authController->hasUserPermission()) return $homeController->jsonResponse(401, 'Not permitted.');
+
+    $orderController = new OrderController;
+
+    if ($orderController->updateOrderItem()) {
+        $homeController->jsonResponse(201, 'Order item was updated.');
+    } else {
+        $homeController->jsonResponse(400, 'Mistake.');
+    }
 });
 
 // match current request url
@@ -82,6 +123,6 @@ if (is_array($match) && is_callable($match['target'])) {
     call_user_func_array($match['target'], $match['params']);
 } else {
     // no route was matched
-    header( $_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
-    //var_dump(1);
+    header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
+    echo '1';
 }

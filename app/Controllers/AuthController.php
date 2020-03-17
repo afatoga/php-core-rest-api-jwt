@@ -84,10 +84,6 @@ class AuthController
     {
         $secret_key = "n<up,[QXXc07wK<M0eYpA?+3{~r;05cZCg>MH73^o#Uz8LhlTKB<&ZL_CuG3-unU"; //"YOUR_SECRET_KEY"
         $jwt = null;
-        $databaseService = new DatabaseService();
-        $conn = $databaseService->getConnection();
-
-        $data = json_decode(file_get_contents("php://input"));
 
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
 
