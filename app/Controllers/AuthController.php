@@ -27,9 +27,9 @@ class AuthController
         $email = $data->email;
         $password = $data->password;
 
-        $table_name = 'users';
+        $table_name = 'Users';
 
-        $query = "SELECT Id, Password FROM " . $table_name . " WHERE Email = ? LIMIT 0,1";
+        $query = "SELECT Id, Password, GroupId FROM " . $table_name . " WHERE Email = ? LIMIT 0,1";
 
         $stmt = $conn->prepare($query);
         $stmt->bindParam(1, $email);
@@ -39,9 +39,9 @@ class AuthController
         if ($num > 0) {
             $row = $stmt->fetch(\PDO::FETCH_ASSOC);
             //$id = $row['id'];
-            $password2 = $row['Password'];
+            //$hashedPw = password_hash($password, PASSWORD_BCRYPT);
 
-            if (password_verify($password, $password2)) {
+            if (password_verify($password, $row['Password'])) {
                 $secret_key = "n<up,[QXXc07wK<M0eYpA?+3{~r;05cZCg>MH73^o#Uz8LhlTKB<&ZL_CuG3-unU"; //"YOUR_SECRET_KEY";
                 $issuer_claim = "dubsea.g6.cz"; // this can be the servername
                 $audience_claim = "THE_AUDIENCE";
@@ -58,7 +58,7 @@ class AuthController
                         //"id" => $id,
                         //"firstname" => $firstname,
                         //"lastname" => $lastname,
-                        "email" => $email,
+                        "groupId" => (int) $row['GroupId'],
                     ]
                 ];
 
@@ -75,12 +75,12 @@ class AuthController
                 );
             } else {
                 http_response_code(401);
-                echo json_encode(array("message" => "Login failed.", "password" => $password));
+                echo json_encode(array("message" => "Login failed."));
             }
         }
     }
 
-    public function hasUserPermission(): bool
+    public function hasUserPermission(int $groupId = null): bool
     {
         $secret_key = "n<up,[QXXc07wK<M0eYpA?+3{~r;05cZCg>MH73^o#Uz8LhlTKB<&ZL_CuG3-unU"; //"YOUR_SECRET_KEY"
         $jwt = null;
@@ -96,7 +96,16 @@ class AuthController
             try {
 
                 $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
-                return true;
+
+                if ( is_null($groupId) ) 
+                {
+                    return true;
+                } else if ($decoded->data->groupId == $groupId)
+                {
+                    return true;
+                } else {
+                    return false;
+                }
             } catch (\Exception $e) {
                 return false;
             }

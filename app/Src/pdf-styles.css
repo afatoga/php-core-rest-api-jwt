@@ -1,0 +1,45 @@
+#wrapper {
+   width: 300px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.float-right {
+    margin-left: 10px;
+}
+
+.m-0 {
+    margin: 0;
+}
+
+.d-inline-block {
+    display: inline-block;
+}
+
+.mx-auto {
+    margin: 0 auto;
+}
+
+table td, table td * {
+    vertical-align: top;
+}
+
+div.section {
+    border-bottom: 2px solid #ccc;
+    min-width: 700px;
+}
+
+table.topLevelTable {
+    width: 300px;
+}
+
+.font-bigger {
+    font-size: 1.2rem;
+    line-height: 1rem;;
+}

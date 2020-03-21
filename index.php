@@ -5,6 +5,7 @@ require "./vendor/autoload.php";
 use App\Controllers\HomeController;
 use App\Controllers\AuthController;
 use App\Controllers\OrderController;
+use App\Controllers\PrintController;
 
 $router = new AltoRouter();
 
@@ -12,6 +13,20 @@ $router = new AltoRouter();
 $router->map('GET', '/', function () {
     $homeController = new HomeController;
     $homeController->home();
+});
+
+// map homepage
+$router->map('GET', '/print/*', function () {
+    $homeController = new HomeController;
+
+    $hashedDocumentId = filter_var($_GET['doc'], FILTER_SANITIZE_STRING);
+    $orderId = filter_var($_GET['orderId'], FILTER_VALIDATE_INT);
+    $ownerId = filter_var($_GET['ownerId'], FILTER_VALIDATE_INT);
+
+    if ( md5($orderId . 'yPf.FJY~r)[') !== $hashedDocumentId || !$orderId || !$ownerId) return $homeController->jsonResponse(401, 'Not permitted.');
+
+    $printController = new PrintController;
+    $printController->getOrderPDF($orderId, $ownerId);
 });
 
 // map user details page
@@ -26,7 +41,7 @@ $router->map('POST', '/af-api/login', function () {
 });
 
 // map getOrders with count ..?count=0 (all)
-$router->map('GET', '/af-api/get-orders/*', function () {
+$router->map('GET', '/af-api/[i:ownerId]/get-orders/*', function ($ownerId) {
     $authController = new AuthController;
     $homeController = new HomeController;
 
@@ -37,7 +52,7 @@ $router->map('GET', '/af-api/get-orders/*', function () {
     $count = filter_var($_GET['count'], FILTER_VALIDATE_INT);
 
     if ($count >= 0) {
-        $orderList = $orderController->getOrders((int) $count);
+        $orderList = $orderController->getOrders($ownerId, (int) $count);
 
         if ($orderList) {
             $homeController->jsonResponse(200, null, $orderList);
@@ -50,16 +65,16 @@ $router->map('GET', '/af-api/get-orders/*', function () {
 });
 
 // map get order total price
-$router->map('GET', '/af-api/get-order-total-price/*', function () {
+$router->map('GET', '/af-api/[i:ownerId]/get-order-total-price/*', function ($ownerId) {
     $authController = new AuthController;
     $homeController = new HomeController;
 
-    if (!$authController->hasUserPermission()) return $homeController->jsonResponse(401, 'Not permitted.');
-    
+    if (!$authController->hasUserPermission($ownerId)) return $homeController->jsonResponse(401, 'Not permitted.');
+
     $orderController = new OrderController;
     $orderId = filter_var($_GET['orderId'], FILTER_VALIDATE_INT);
 
-    if ($orderId) $totalPrice = $orderController->getOrderTotalPrice($orderId);
+    if ($orderId) $totalPrice = $orderController->getOrderTotalPrice($orderId, $ownerId);
     if (is_null($totalPrice)) {
         $homeController->jsonResponse(404, 'Order not found.');
     } else {
@@ -79,7 +94,22 @@ $router->map('POST', '/af-api/create-new-order', function () {
     if ($orderController->createNewOrder()) {
         $homeController->jsonResponse(201, 'New order was created.');
     } else {
-        $homeController->jsonResponse(401, 'Mistake.');
+        $homeController->jsonResponse(400, 'Mistake.');
+    }
+});
+
+$router->map('POST', '/af-api/update-order', function () {
+    $authController = new AuthController;
+    $homeController = new HomeController;
+
+    if (!$authController->hasUserPermission()) return $homeController->jsonResponse(401, 'Not permitted.');
+
+    $orderController = new OrderController;
+
+    if ($orderController->updateOrder()) {
+        $homeController->jsonResponse(200, 'Order was updated.');
+    } else {
+        $homeController->jsonResponse(400, 'Mistake.');
     }
 });
 
@@ -107,7 +137,7 @@ $router->map('POST', '/af-api/update-order-item', function () {
     $orderController = new OrderController;
 
     if ($orderController->updateOrderItem()) {
-        $homeController->jsonResponse(201, 'Order item was updated.');
+        $homeController->jsonResponse(200, 'Order item was updated.');
     } else {
         $homeController->jsonResponse(400, 'Mistake.');
     }

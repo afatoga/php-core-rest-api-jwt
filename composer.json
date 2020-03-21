@@ -1,7 +1,8 @@
 {
     "require": {
         "firebase/php-jwt": "^5.1",
-        "altorouter/altorouter": "1.1.0"
+        "altorouter/altorouter": "1.1.0",
+        "mpdf/mpdf": "^8.0"
     },
     "autoload": {
         "psr-4": {
