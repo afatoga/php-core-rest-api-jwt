@@ -3,6 +3,10 @@
 namespace App\Controllers;
 
 use \App\DatabaseService;
+use FilipSedivy\EET\Certificate;
+use FilipSedivy\EET\Dispatcher;
+use FilipSedivy\EET\Receipt;
+use Ramsey\Uuid\Uuid;
 
 class OrderController
 {
@@ -26,8 +30,7 @@ class OrderController
         $stmt->execute();
 
         $num = $stmt->rowCount();
-        if ($num > 0) 
-        {
+        if ($num > 0) {
             $orderList = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             return $orderList;
         }
@@ -56,10 +59,9 @@ class OrderController
         $stmt->bindParam(1, $ownerId);
         $status = $stmt->execute();
 
-        if ($status)
-        {
+        if ($status) {
             $orderId = (int) $this->db->lastInsertId();
-            $newOrderItemId = $this->insertNewOrderItem( $orderId );
+            $newOrderItemId = $this->insertNewOrderItem($orderId);
             if ($newOrderItemId) return true;
         }
         return false;
@@ -72,7 +74,7 @@ class OrderController
         $data = json_decode(file_get_contents("php://input"));
         $orderId = (int) $data->orderId;
         $ownerId = (int) $data->ownerId;
-        $isCancelled = (isset( $data->isCancelled )) ? (int) $data->isCancelled : 0;
+        $isCancelled = (isset($data->isCancelled)) ? (int) $data->isCancelled : 0;
 
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(1, $ownerId);
@@ -84,10 +86,55 @@ class OrderController
         return false;
     }
 
+    public function submitOrder()
+    {
+        $receipt = new Receipt;
+        $receipt->uuid_zpravy = Uuid::uuid4()->toString();
+        $receipt->id_provoz = '141';
+        $receipt->id_pokl = '1patro-vpravo';
+        $receipt->porad_cis = '141-18543-05';
+        $receipt->dic_popl = 'CZ00000019';
+        $receipt->dat_trzby = new \DateTime;
+        $receipt->celk_trzba = 500;
+
+        $certificate = new Certificate('.\app\Src\EET_CA1_Playground-CZ00000019.p12', 'eet');
+        $dispatcher = new Dispatcher($certificate, Dispatcher::PLAYGROUND_SERVICE);
+
+        try {
+            $dispatcher->send($receipt);
+
+            echo 'FIK: ' . $dispatcher->getFik();
+            echo 'BKP: ' . $dispatcher->getBkp();
+        } catch (FilipSedivy\EET\Exceptions\EET\ClientException $exception) {
+            echo 'BKP: ' . $exception->getBkp();
+            echo 'PKP:' . $exception->getPkp();
+        } catch (FilipSedivy\EET\Exceptions\EET\ErrorException $exception) {
+            echo '(' . $exception->getCode() . ') ' . $exception->getMessage();
+        } catch (FilipSedivy\EET\Exceptions\Receipt\ConstraintViolationException $violationException) {
+            echo implode('<br>', $violationException->getErrors());
+        }
+
+        // // eet
+        // $query = "UPDATE Orders SET OwnerId = ?, IsCancelled = ? WHERE Id = ?";
+
+        // $data = json_decode(file_get_contents("php://input"));
+        // $orderId = (int) $data->orderId;
+        // $ownerId = (int) $data->ownerId;
+        // $isCancelled = (isset( $data->isCancelled )) ? (int) $data->isCancelled : 0;
+
+        // $stmt = $this->db->prepare($query);
+        // $stmt->bindParam(1, $ownerId);
+        // $stmt->bindParam(2, $isCancelled);
+        // $stmt->bindParam(3, $orderId);
+        // $stmt->execute();
+
+        // if ($stmt->rowCount() > 0) return true;
+        // return false;
+    }
+
     public function insertNewOrderItem(int $orderId = null): bool
     {
-        if (is_null($orderId))
-        {
+        if (is_null($orderId)) {
             $data = json_decode(file_get_contents("php://input"));
             $orderId = (int) $data->orderId;
             $price = (float) $data->price;
@@ -140,5 +187,20 @@ class OrderController
 
         if ($stmt->rowCount() > 0) return true;
         return false;
+    }
+
+    public function getOrderItems(int $orderId): ?array
+    {
+        $query = "SELECT * FROM OrderItems WHERE OrderId = ? ORDER BY Id ASC";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $orderId, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $num = $stmt->rowCount();
+        if ($num > 0) {
+            $itemList = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            return $itemList;
+        }
     }
 }

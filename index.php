@@ -16,6 +16,12 @@ $router->map('GET', '/', function () {
 });
 
 // map homepage
+$router->map('GET', '/send', function () {
+    $orderController = new OrderController;
+    $orderController->submitOrder();
+});
+
+// map printing pdf
 $router->map('GET', '/print/*', function () {
     $homeController = new HomeController;
 
@@ -26,12 +32,7 @@ $router->map('GET', '/print/*', function () {
     if ( md5($orderId . 'yPf.FJY~r)[') !== $hashedDocumentId || !$orderId || !$ownerId) return $homeController->jsonResponse(401, 'Not permitted.');
 
     $printController = new PrintController;
-    $printController->getOrderPDF($orderId, $ownerId);
-});
-
-// map user details page
-$router->map('GET', '/user/[i:id]/', function ($id) {
-    require __DIR__ . '/views/user-details.php';
+    if (is_null($printController->getOrderPDF($orderId, $ownerId))) return $homeController->jsonResponse(403, 'Empty order.');
 });
 
 // map login
@@ -147,7 +148,6 @@ $router->map('POST', '/af-api/update-order-item', function () {
 $match = $router->match();
 
 // call closure or throw 404 status
-//var_dump($match);
 
 if (is_array($match) && is_callable($match['target'])) {
     call_user_func_array($match['target'], $match['params']);
