@@ -27,6 +27,13 @@ class AuthController
         $email = $data->email;
         $password = $data->password;
 
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+        {
+            http_response_code(400);
+            echo json_encode(array("message" => "E-mail is not valid."));
+            return;
+        }
+
         $table_name = 'Users';
 
         $query = "SELECT Id, Password, GroupId FROM " . $table_name . " WHERE Email = ? LIMIT 0,1";

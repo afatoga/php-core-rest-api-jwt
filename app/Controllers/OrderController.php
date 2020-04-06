@@ -18,15 +18,16 @@ class OrderController
         $this->db = $databaseService->getConnection();
     }
 
-    public function getOrders(int $count): ?array
+    public function getOrders(int $ownerId, int $count): ?array
     {
-        $query = "SELECT * FROM Orders ORDER BY CreatedAt DESC LIMIT ?";
+        $query = "SELECT * FROM Orders WHERE OwnerId = ? ORDER BY CreatedAt DESC LIMIT ?";
 
         $stmt = $this->db->prepare($query);
 
         if ($count == 0 || $count >= 99) $count = 100;
 
-        $stmt->bindParam(1, $count, \PDO::PARAM_INT);
+        $stmt->bindParam(1, $ownerId, \PDO::PARAM_INT);
+        $stmt->bindParam(2, $count, \PDO::PARAM_INT);
         $stmt->execute();
 
         $num = $stmt->rowCount();
