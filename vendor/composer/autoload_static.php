@@ -39,6 +39,10 @@ class ComposerStaticInit0c75c1065f8d6ad367e03dddd576f07f
         array (
             'Mpdf\\' => 5,
         ),
+        'I' => 
+        array (
+            'Ifsnop\\' => 7,
+        ),
         'F' => 
         array (
             'Firebase\\JWT\\' => 13,
@@ -94,6 +98,10 @@ class ComposerStaticInit0c75c1065f8d6ad367e03dddd576f07f
         'Mpdf\\' => 
         array (
             0 => __DIR__ . '/..' . '/mpdf/mpdf/src',
+        ),
+        'Ifsnop\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop',
         ),
         'Firebase\\JWT\\' => 
         array (

@@ -18,23 +18,42 @@ class OrderController
         $this->db = $databaseService->getConnection();
     }
 
-    public function getOrders(int $ownerId, int $count): ?array
-    {
-        $query = "SELECT * FROM Orders WHERE OwnerId = ? ORDER BY CreatedAt DESC LIMIT ?";
+    public function getOrders(int $ownerId, int $pageIndex = 0, int $pageSize = 4): ?array
+    {   
+        $query = "SELECT COUNT(*) FROM Orders WHERE OwnerId = ?";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $ownerId, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $totalOrdersCount = (int) $stmt->fetchColumn();
+
+        $query = "SELECT * FROM Orders WHERE OwnerId = ? ORDER BY CreatedAt DESC LIMIT ? OFFSET ?";
 
         $stmt = $this->db->prepare($query);
 
-        if ($count == 0 || $count >= 99) $count = 100;
+        if ($pageIndex == 0) $offset = 0;
+        else {
+            $offset = $pageIndex * $pageSize;
+        }
 
         $stmt->bindParam(1, $ownerId, \PDO::PARAM_INT);
-        $stmt->bindParam(2, $count, \PDO::PARAM_INT);
+        $stmt->bindParam(2, $pageSize, \PDO::PARAM_INT);
+        $stmt->bindParam(3, $offset, \PDO::PARAM_INT);
         $stmt->execute();
 
         $num = $stmt->rowCount();
+
         if ($num > 0) {
             $orderList = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            return $orderList;
+
+            $response["hasMore"] = ($totalOrdersCount > ($offset+$pageSize)) ? 1 : 0;
+            $response["totalOrdersCount"] = $totalOrdersCount;
+            $response["orders"] = $orderList;
+            return $response;
         }
+
+        return null;
     }
 
     public function getOrderTotalPrice(int $orderId, int $ownerId): ?float

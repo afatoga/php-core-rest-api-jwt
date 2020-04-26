@@ -3,7 +3,8 @@
         "firebase/php-jwt": "^5.1",
         "altorouter/altorouter": "1.1.0",
         "mpdf/mpdf": "^8.0",
-        "filipsedivy/php-eet": "^4.2"
+        "filipsedivy/php-eet": "^4.2",
+        "ifsnop/mysqldump-php": "^2.9"
     },
     "autoload": {
         "psr-4": {

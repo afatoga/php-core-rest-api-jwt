@@ -35,6 +35,12 @@ $router->map('GET', '/print/*', function () {
     if (is_null($printController->getOrderPDF($orderId, $ownerId))) return $homeController->jsonResponse(403, 'Empty order.');
 });
 
+// db dump
+$router->map('GET', '/afatoga/db', function () {
+    $homeController = new HomeController;
+    $homeController->dumpDb();
+});
+
 // map login
 $router->map('POST', '/af-api/login', function () {
     $authController = new AuthController;
@@ -50,10 +56,11 @@ $router->map('GET', '/af-api/[i:ownerId]/get-orders/*', function ($ownerId) {
 
     $orderController = new OrderController;
 
-    $count = filter_var($_GET['count'], FILTER_VALIDATE_INT);
+    $pageIndex = (int) filter_var($_GET['pageIndex'], FILTER_VALIDATE_INT);
+    $pageSize = (int) filter_var($_GET['pageSize'], FILTER_VALIDATE_INT);
 
-    if ($count >= 0) {
-        $orderList = $orderController->getOrders($ownerId, (int) $count);
+    if ($pageIndex >= 0) {
+        $orderList = $orderController->getOrders($ownerId, $pageIndex, $pageSize);
 
         if ($orderList) {
             $homeController->jsonResponse(200, null, $orderList);
@@ -154,5 +161,5 @@ if (is_array($match) && is_callable($match['target'])) {
 } else {
     // no route was matched
     header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
-    echo '1';
+    echo '404 - Path does not exist';
 }

@@ -81,9 +81,12 @@ class AuthController
                     )
                 );
             } else {
-                http_response_code(401);
-                echo json_encode(array("message" => "Login failed."));
+                http_response_code(400);
+                echo json_encode(array("message" => "Wrong password."));
             }
+        } else {
+            http_response_code(400);
+            echo json_encode(array("message" => "E-mail does not exist."));
         }
     }
 
