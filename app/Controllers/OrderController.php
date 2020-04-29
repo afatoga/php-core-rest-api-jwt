@@ -7,6 +7,7 @@ use FilipSedivy\EET\Certificate;
 use FilipSedivy\EET\Dispatcher;
 use FilipSedivy\EET\Receipt;
 use Ramsey\Uuid\Uuid;
+use Wruczek\PhpFileCache\PhpFileCache;
 
 class OrderController
 {
@@ -18,8 +19,39 @@ class OrderController
         $this->db = $databaseService->getConnection();
     }
 
-    public function getOrders(int $ownerId, int $pageIndex = 0, int $pageSize = 4): ?array
-    {   
+    public function getOrders(int $ownerId, int $pageIndex, int $pageSize = 20, string $sort = 'CreatedAt', string $direction = 'DESC'): ?array
+    {
+        $props = [
+            'ownerId' => $ownerId,
+            'pageIndex' => $pageIndex,
+            'pageSize' => $pageSize,
+            'sort' => $sort,
+            'direction' => $direction
+        ];
+
+        if ($direction === 'DESC' && $sort === 'CreatedAt') {
+            $cache = new PhpFileCache(__DIR__ . "/../af-cache/");
+            $cacheTitle = "get-orders-owner-" . $ownerId;
+
+            if ($cache->isExpired($cacheTitle)) {
+                $store = $this->fetchOrders($props);
+                $cache->store($cacheTitle, $store, 604800);
+            }
+
+            $data = $cache->retrieve($cacheTitle);
+        } else {
+            $data = $this->fetchOrders($props);
+        }
+
+        return $data;
+    }
+
+    private function fetchOrders(array $props): ?array
+    {
+        foreach ($props as $key => $value) {
+            $$key = $value;
+        }
+
         $query = "SELECT COUNT(*) FROM Orders WHERE OwnerId = ?";
 
         $stmt = $this->db->prepare($query);
@@ -28,26 +60,27 @@ class OrderController
 
         $totalOrdersCount = (int) $stmt->fetchColumn();
 
-        $query = "SELECT * FROM Orders WHERE OwnerId = ? ORDER BY CreatedAt DESC LIMIT ? OFFSET ?";
+        $query = "SELECT * FROM Orders WHERE OwnerId = :ownerId ORDER BY $sort $direction LIMIT :pageSize OFFSET :offset";
 
         $stmt = $this->db->prepare($query);
 
-        if ($pageIndex == 0) $offset = 0;
-        else {
+        if ($pageIndex == 0) {
+            $offset = 0;
+        } else {
             $offset = $pageIndex * $pageSize;
         }
 
-        $stmt->bindParam(1, $ownerId, \PDO::PARAM_INT);
-        $stmt->bindParam(2, $pageSize, \PDO::PARAM_INT);
-        $stmt->bindParam(3, $offset, \PDO::PARAM_INT);
-        $stmt->execute();
+        $stmt->bindParam(":ownerId", $ownerId, \PDO::PARAM_INT);
+        $stmt->bindParam(":pageSize", $pageSize, \PDO::PARAM_INT);
+        $stmt->bindParam(":offset", $offset, \PDO::PARAM_INT);
 
+        $stmt->execute();
         $num = $stmt->rowCount();
 
         if ($num > 0) {
             $orderList = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $response["hasMore"] = ($totalOrdersCount > ($offset+$pageSize)) ? 1 : 0;
+            $response["hasMore"] = ($totalOrdersCount > ($offset + $pageSize)) ? 1 : 0;
             $response["totalOrdersCount"] = $totalOrdersCount;
             $response["orders"] = $orderList;
             return $response;
@@ -73,6 +106,7 @@ class OrderController
     {
         $data = json_decode(file_get_contents("php://input"));
         $ownerId = (int) $data->ownerId;
+
         $query = "INSERT INTO Orders (OwnerId) VALUES (?)";
 
         $stmt = $this->db->prepare($query);
@@ -80,6 +114,11 @@ class OrderController
         $status = $stmt->execute();
 
         if ($status) {
+
+            $cache = new PhpFileCache(__DIR__ . "/../testcache/");
+            $cacheTitle = "get-orders-owner-" . $ownerId;
+            $cache->eraseKey($cacheTitle);
+
             $orderId = (int) $this->db->lastInsertId();
             $newOrderItemId = $this->insertNewOrderItem($orderId);
             if ($newOrderItemId) return true;

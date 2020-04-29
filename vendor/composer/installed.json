@@ -953,5 +953,48 @@
         ],
         "description": "Symfony Validator Component",
         "homepage": "https://symfony.com"
+    },
+    {
+        "name": "wruczek/php-file-cache",
+        "version": "0.0.5",
+        "version_normalized": "0.0.5.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/Wruczek/PHP-File-Cache.git",
+            "reference": "83b0da10bc4cbf03fcc6f593abe7bfb663719902"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/Wruczek/PHP-File-Cache/zipball/83b0da10bc4cbf03fcc6f593abe7bfb663719902",
+            "reference": "83b0da10bc4cbf03fcc6f593abe7bfb663719902",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.4.0"
+        },
+        "require-dev": {
+            "php": ">=5.6.0",
+            "phpunit/phpunit": "5.6.*"
+        },
+        "time": "2020-04-06T04:02:34+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Wruczek\\PhpFileCache\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Wruczek",
+                "email": "wruczekk@gmail.com",
+                "homepage": "https://wruczek.tech"
+            }
+        ],
+        "description": "Light, simple and standalone PHP in-file caching class"
     }
 ]

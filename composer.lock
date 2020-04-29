@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7f0814980f64611daad4ab8f4300a51e",
+    "content-hash": "71b772da865570259fcbbb2556e67bb9",
     "packages": [
         {
             "name": "altorouter/altorouter",
@@ -928,6 +928,47 @@
             "description": "Symfony Validator Component",
             "homepage": "https://symfony.com",
             "time": "2020-02-29T10:05:28+00:00"
+        },
+        {
+            "name": "wruczek/php-file-cache",
+            "version": "0.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Wruczek/PHP-File-Cache.git",
+                "reference": "83b0da10bc4cbf03fcc6f593abe7bfb663719902"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Wruczek/PHP-File-Cache/zipball/83b0da10bc4cbf03fcc6f593abe7bfb663719902",
+                "reference": "83b0da10bc4cbf03fcc6f593abe7bfb663719902",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "php": ">=5.6.0",
+                "phpunit/phpunit": "5.6.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Wruczek\\PhpFileCache\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Wruczek",
+                    "email": "wruczekk@gmail.com",
+                    "homepage": "https://wruczek.tech"
+                }
+            ],
+            "description": "Light, simple and standalone PHP in-file caching class",
+            "time": "2020-04-06T04:02:34+00:00"
         }
     ],
     "packages-dev": [],

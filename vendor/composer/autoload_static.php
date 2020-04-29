@@ -18,6 +18,10 @@ class ComposerStaticInit0c75c1065f8d6ad367e03dddd576f07f
         array (
             'setasign\\Fpdi\\' => 14,
         ),
+        'W' => 
+        array (
+            'Wruczek\\PhpFileCache\\' => 21,
+        ),
         'S' => 
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
@@ -62,6 +66,10 @@ class ComposerStaticInit0c75c1065f8d6ad367e03dddd576f07f
         'setasign\\Fpdi\\' => 
         array (
             0 => __DIR__ . '/..' . '/setasign/fpdi/src',
+        ),
+        'Wruczek\\PhpFileCache\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wruczek/php-file-cache/src',
         ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
