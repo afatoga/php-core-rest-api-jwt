@@ -1,6 +1,6 @@
 {
     "require": {
-        "firebase/php-jwt": "^5.1",
+        "firebase/php-jwt": "^6.0",
         "altorouter/altorouter": "1.1.0",
         "mpdf/mpdf": "^8.0"
     },
